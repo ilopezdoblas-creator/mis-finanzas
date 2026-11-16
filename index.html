@@ -426,32 +426,33 @@ function parseDate(v, defYear){
 }
 
 /* ---------- categorías ---------- */
-const CATS = ["Nómina e ingresos","Supermercado","Vivienda","Suministros","Seguros","Transporte","Restaurantes","Compras","Suscripciones y ocio","Salud","Educación","Impuestos","Efectivo","Comisiones","Ahorro e inversión","Bizum y transferencias","Traspasos entre cuentas","Otros gastos","Otros ingresos"];
+const CATS = ["Nómina e ingresos","Supermercado","Vivienda","Suministros","Seguros","Transporte","Restaurantes","Compras","Suscripciones y ocio","Salud","Educación","Impuestos","Efectivo","Comisiones","Ahorro e inversión","Préstamos y financiación","Bizum y transferencias","Traspasos entre cuentas","Otros gastos","Otros ingresos"];
 const RULES = [
   ["Nómina e ingresos", /nomina|salario|haberes|pension|prestacion|paro sepe|devolucion hacienda|devolucion aeat/],
   ["Traspasos entre cuentas", /traspaso|transf\. propia|entre cuentas|cuenta propia/],
-  ["Supermercado", /mercadona|carrefour|lidl|aldi|\bdia\b|alcampo|eroski|consum|hipercor|supercor|caprabo|bonpreu|ahorramas|el arbol|gadis|froiz|spar|condis|supermercado|mas y mas|family cash|covirán|coviran/],
-  ["Vivienda", /alquiler|hipoteca|comunidad de prop|comunidad prop|cdad prop|reforma|leroy|ikea|bauhaus/],
-  ["Suministros", /iberdrola|endesa|naturgy|repsol luz|totalenergies|holaluz|aguas|canal de isabel|agua |gas natural|\bluz\b|movistar|telefonica|vodafone|orange|digi|jazztel|masmovil|yoigo|pepephone|lowi|simyo|o2 /],
-  ["Seguros", /seguro|mapfre|axa|allianz|mutua|linea directa|generali|zurich|sanitas|adeslas|asisa|dkv|santalucia|ocaso|reale|liberty|catalana occidente|pelayo|caser|verti|occident|fenix directo|helvetia|plus ultra|aegon|vidacaixa|segurcaixa|nationale/],
+  ["Supermercado", /supeco|alimentacion|fruteria|carniceria|panaderia|mercadona|carrefour|lidl|aldi|\bdia\b|alcampo|eroski|consum|hipercor|supercor|caprabo|bonpreu|ahorramas|el arbol|gadis|froiz|spar|condis|supermercado|mas y mas|family cash|covirán|coviran/],
+  ["Préstamos y financiación", /serv finan|leasing|financiacion|prestamo|amortizacion|cuota prestamo|cofidis|cetelem|carrefour pass/],
+  ["Vivienda", /alquiler|hipoteca|comunidad de prop|comunidad prop|cdad\.? ?prop|reforma|leroy|ikea|bauhaus/],
+  ["Suministros", /energia|iberdrola|endesa|naturgy|repsol luz|totalenergies|holaluz|aguas|canal de isabel|agua |gas natural|\bluz\b|movistar|telefonica|vodafone|orange|digi|jazztel|masmovil|yoigo|pepephone|lowi|simyo|o2 /],
+  ["Seguros", /operacion csv|seguro|mapfre|axa|allianz|mutua|linea directa|generali|zurich|sanitas|adeslas|asisa|dkv|santalucia|ocaso|reale|liberty|catalana occidente|pelayo|caser|verti|occident|fenix directo|helvetia|plus ultra|aegon|vidacaixa|segurcaixa|nationale/],
   ["Transporte", /gasolin|repsol|cepsa|\bbp\b|galp|shell|petronor|ballenoil|plenoil|renfe|metro|emt|alsa|uber(?! ?eats)|cabify|bolt|parking|aparcamiento|autopista|peaje|via-t|vía t|itv|taller|neumatic|norauto|iryo|ouigo|vueling|ryanair|iberia/],
   ["Restaurantes", /restaurante|bar |cafeteria|cafe |glovo|just ?eat|uber ?eats|telepizza|burger|mcdonald|kfc|domino|foster|vips|goiko|starbucks|tapas|pizzeria/],
-  ["Compras", /amazon|amzn|zara|el corte ingles|aliexpress|shein|primark|decathlon|mediamarkt|fnac|pccomponentes|h&m|mango|pull&bear|bershka|wallapop|vinted|temu/],
-  ["Suscripciones y ocio", /netflix|spotify|hbo|max\.com|disney|prime video|apple\.com|icloud|google|youtube|dazn|filmin|cine|teatro|ticketmaster|playstation|steam|nintendo|xbox|gimnasio|gym|basic-fit|viajes|booking|airbnb|hotel/],
+  ["Compras", /tarj\.? visa|amazon|amzn|zara|el corte ingles|aliexpress|shein|primark|decathlon|mediamarkt|fnac|pccomponentes|h&m|mango|pull&bear|bershka|wallapop|vinted|temu/],
+  ["Suscripciones y ocio", /centro deportivo|netflix|spotify|hbo|max\.com|disney|prime video|apple\.com|icloud|google|youtube|dazn|filmin|cine|teatro|ticketmaster|playstation|steam|nintendo|xbox|gimnasio|gym|basic-fit|viajes|booking|airbnb|hotel/],
   ["Salud", /farmacia|clinica|dentista|optica|hospital|medico|fisioterap|veterinar/],
-  ["Educación", /colegio|escuela|universidad|academia|matricula|libreria|guarderia/],
-  ["Impuestos", /aeat|hacienda|agencia tributaria|ibi|impuesto|tasa |ayuntamiento|ivtm|dgt|multa|tributos/],
-  ["Efectivo", /cajero|reintegro|retirada efectivo|disposicion efectivo/],
+  ["Educación", /comunidad pasionist|colegio|escuela|universidad|academia|matricula|libreria|guarderia/],
+  ["Impuestos", /ayto\.?|aeat|hacienda|agencia tributaria|\bibi\b|impuesto|tasa |ayuntamiento|ivtm|dgt|multa|tributos/],
+  ["Efectivo", /carga vi|desc\.tv|cajero|reintegro|retirada efectivo|disposicion efectivo/],
   ["Comisiones", /comision|mantenimiento cuenta|intereses deudores|cuota tarjeta/],
   ["Ahorro e inversión", /fondo|inversion|indexa|myinvestor|trade republic|plan de pensiones|deposito|broker|degiro|cripto|binance|coinbase/],
-  ["Bizum y transferencias", /bizum|transferencia|transf /],
+  ["Bizum y transferencias", /ibercajapay|bizum|transferencia|transf /],
 ];
 function categorize(concept, amount){
   const c = norm(concept);
   for (const [k, cat] of Object.entries(state.rules)) if (k && c.includes(k)) return cat;
   for (const [cat, re] of RULES) if (re.test(c)) {
     if (cat === "Nómina e ingresos" && amount < 0) continue;
-    if (cat === "Bizum y transferencias" || cat === "Traspasos entre cuentas") return cat;
+    if (["Bizum y transferencias","Traspasos entre cuentas","Efectivo","Ahorro e inversión"].includes(cat)) return cat;
     if (amount > 0 && !["Nómina e ingresos","Ahorro e inversión"].includes(cat)) return "Otros ingresos";
     return cat;
   }
@@ -801,14 +802,14 @@ function rowsToDue(rows, hi, src, out, yearHint){
 /* Texto libre (PDF y diapositivas): líneas con fecha + importe, y pólizas */
 const AMT_RE = /[-−]?\d{1,3}(?:\.\d{3})*,\d{2}-?|[-−]?\d+,\d{2}-?|[-−]?\d{1,3}(?:,\d{3})*\.\d{2}\b/g;
 const DATE_RE = /^\s*(\d{1,2}[\/\-.]\d{1,2}(?:[\/\-.]\d{2,4})?|\d{1,2}\s(?:ene|feb|mar|abr|may|jun|jul|ago|sep|oct|nov|dic)[a-z]*\.?(?:\s\d{2,4})?)/i;
-function linesToRecords(lines, src, out){
+function linesToRecords(lines, src, out, opts = {}){
   const all = lines.map(l => typeof l === "string" ? {text:l, items:null} : l);
-  const yearHint = guessYear(all.map(l=>l.text).join(" "));
+  const yearHint = opts.yearHint || guessYear(all.map(l=>l.text).join(" "));
   let cols = null, prevBal = null, n = 0;
   for (const ln of all){
     const t = ln.text.replace(/\s+/g," ").trim(); const nt = norm(t);
     // columnas cargo/abono por posición
-    if (ln.items && /(cargo|debe|debito)/.test(nt) && /(abono|haber|credito)/.test(nt)) {
+    if (ln.items && /(cargo|debe|debito)/.test(nt) && /(abono|haber|credito)/.test(nt) && !/num\.? ?debe/.test(nt)) {
       const pos = re => { const it = ln.items.find(i => re.test(norm(i.str))); return it ? it.x + it.w/2 : null; };
       cols = {debit: pos(/cargo|debe|debito/), credit: pos(/abono|haber|credito/), bal: pos(/saldo/)};
       continue;
@@ -818,10 +819,11 @@ function linesToRecords(lines, src, out){
     const date = parseDate(dm[1], yearHint); if (!date) continue;
     let rest = t.slice(dm[0].length).replace(/^\s*\d{1,2}[\/\-.]\d{1,2}(?:[\/\-.]\d{2,4})?\s*/,""); // fecha valor
     const amts = [...rest.matchAll(AMT_RE)]; if (!amts.length) continue;
-    const concept = rest.slice(0, amts[0].index).replace(/[€\s]+$/,"").trim() || "(sin concepto)";
-    let amount = parseAmount(amts.length >= 2 ? amts[amts.length-2][0].replace("−","-") : amts[0][0].replace("−","-"));
-    const bal = amts.length >= 2 ? parseAmount(amts[amts.length-1][0].replace("−","-")) : null;
-    const explicitSign = /[-−]|-$/.test(amts.length >= 2 ? amts[amts.length-2][0] : amts[0][0]);
+    if (/refund\. apuntes|saldo dispuesto|^reembolso|sdo\. cta|hab\.? ?pact|saldo medio|^a \d{2}-\d{2}/.test(norm(rest))) continue;
+    const concept = cleanConcept(rest.slice(0, amts[0].index).replace(/[€\s]+$/,"").trim()) || "(sin concepto)";
+    let amount = parseAmount(amts[0][0].replace("−","-"));
+    const bal = amts.length >= 2 ? parseAmount(amts[1][0].replace("−","-")) : null;
+    const explicitSign = /[-−]|-$/.test(amts[0][0]);
     if (!explicitSign && cols && ln.items){
       const ONE = /^\s*[-−]?[\d.,]+,\d{2}-?\s*€?\s*$|^\s*[-−]?[\d,]*\.\d{2}\s*€?\s*$/;
       const cand = ln.items.filter(i => ONE.test(i.str)).filter(i => { const c = i.x + i.w/2; return cols.bal == null || Math.abs(c - cols.bal) > 25; });
@@ -835,7 +837,7 @@ function linesToRecords(lines, src, out){
   }
   // póliza / recibo de seguro
   const full = all.map(l=>l.text).join("\n"); const nf = norm(full);
-  if (/poliza|recibo de prima|aviso de vencimiento|renovacion/.test(nf) && n < 3){
+  if (!opts.noPolicy && /poliza|recibo de prima|aviso de vencimiento|renovacion/.test(nf) && n < 3){
     const after = (re) => { const m = nf.match(re); return m ? nf.slice(m.index, m.index+120) : ""; };
     const dSeg = after(/(fecha de )?(vencimiento|renovacion|fin de (la )?vigencia|efecto hasta|hasta el)/);
     const dm = dSeg.match(/\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{2,4}/) || dSeg.match(/\d{1,2} de [a-z]+ de \d{4}/);
@@ -847,7 +849,121 @@ function linesToRecords(lines, src, out){
     const ramo = (nf.match(/seguro (de |del )?(hogar|auto|automovil|coche|moto|vida|salud|decesos|viaje|mascota|comunidad|responsabilidad civil)/)||[])[2];
     if (date) { out.due.push({name: ramo ? `Seguro de ${ramo === "automovil" ? "coche" : ramo}` : "Póliza", company: cm ? cap(cm[0]) : "", date, amount: pm ? Math.abs(parseAmount(pm[0])) : 0, period: /mensual/.test(nf) ? "mensual" : /trimestral/.test(nf) ? "trimestral" : /semestral/.test(nf) ? "semestral" : "anual", notice:30, source:src}); n++; }
   }
-  if (!n) out.notes.push(`${src}: no encontré movimientos ni pólizas en el texto.`);
+  if (!n && !opts.quiet) out.notes.push(`${src}: no encontré movimientos ni pólizas en el texto.`);
+}
+/* "VENTA LIDL ALCALA DE HENAR\MADRID\ES" -> "LIDL ALCALA DE HENAR" */
+function cleanConcept(c){
+  let s = String(c || "").replace(/\s+/g, " ").trim();
+  s = s.replace(/^(venta|compra)\s+/i, "Compra ");
+  if (s.includes("\\")) s = s.split("\\")[0].trim();
+  return s;
+}
+
+/* PDF con varios documentos (p. ej. la correspondencia de Ibercaja): extractos, extractos de tarjeta,
+   recibos, Bizum, nóminas... Se usan los extractos y solo se suman los justificantes de fechas que
+   ningún extracto cubre, para no contar nada dos veces. */
+const pageText = lines => lines.map(l => l.text).join("\n");
+function readBundle(pages, src, out){
+  const yh = guessYear(pages.map(pageText).join(" "));
+  const D2 = "\\d{2}[-/.]\\d{2}[-/.]\\d{2,4}";
+  const docs = new Map(), coverage = [], cardEnds = {}, receipts = [], dues = [];
+  let prevKey = null, prevCard = null, stmtPages = 0;
+  pages.forEach((lines, i) => {
+    const text = pageText(lines), nt = norm(text);
+    const cardM = text.match(/\*{4}\s?\*{4}\s?\*{4}\s?(\d{4})/);
+    const periodM = text.match(new RegExp(`(${D2})\\s+(?:AL|A)\\s+(${D2})`, "i"));
+    const isCard = /extracto de operaciones|saldo dispuesto|\bventa\b.*\\/.test(nt) || (!!cardM && /pagina/.test(nt) && !/iban\s+es/.test(nt));
+    const isStmt = isCard || /extracto|refundicion de apuntes|f\.\s?apunte|saldo anterior en euros|sdo\. cta/.test(nt);
+    if (isStmt) {
+      stmtPages++;
+      const kind = isCard ? "card" : /refundicion/.test(nt) ? "ref" : /libreta/.test(nt) ? "lib" : "ext";
+      const card = isCard ? (cardM ? cardM[1] : prevCard) : null;
+      const key = periodM ? `${kind}|${card || ""}|${periodM[1]}|${periodM[2]}` : (prevKey || `${kind}|p${i}`);
+      const from = periodM && parseDate(periodM[1], yh), to = periodM && parseDate(periodM[2], yh);
+      if (isCard && card && to) (cardEnds[card] ||= []).push(to);
+      if (!isCard && from && to) coverage.push([from, to]);
+      const sub = {tx:[], due:[], notes:[]};
+      linesToRecords(lines, src, sub, {noPolicy:true, quiet:true, yearHint:yh});
+      const arr = docs.get(key) || []; sub.tx.forEach(t => arr.push(t)); docs.set(key, arr);
+      prevKey = key; prevCard = card; return;
+    }
+    prevKey = null; prevCard = null;
+    const r = parseReceipt(lines, text, nt, yh, src);
+    if (r) { if (r.tx) receipts.push(r.tx); if (r.due) dues.push(...r.due); }
+  });
+  // un mismo movimiento sale en varios extractos (mensual, libreta, refundición): se cuenta una vez
+  const best = new Map();
+  for (const arr of docs.values()) {
+    const c = new Map();
+    for (const t of arr) { const k = `${t.date}|${t.amount.toFixed(2)}|${norm(t.concept).slice(0,16)}`; if (!c.has(k)) c.set(k, []); c.get(k).push(t); }
+    for (const [k, items] of c) { const b = best.get(k); if (!b || items.length > b.length) best.set(k, items); }
+  }
+  const stmtTx = [...best.values()].flat();
+  // el pago mensual de una tarjeta cuyo extracto viene en el PDF no es un gasto nuevo: el detalle ya está importado
+  const days = (a, b) => Math.round((new Date(b) - new Date(a)) / 864e5);
+  let cardPays = 0;
+  for (const t of stmtTx) {
+    const m = norm(t.concept).match(/tarj\.?\s*visa\s*\**\s?(\d{4})/);
+    if (m && (cardEnds[m[1]] || []).some(e => days(e, t.date) >= 0 && days(e, t.date) <= 12)) { t.category = "Traspasos entre cuentas"; t.concept = `Pago tarjeta ****${m[1]} (detalle importado aparte)`; cardPays++; }
+  }
+  const covered = d => coverage.some(([a, b]) => d >= a && d <= b);
+  const extra = receipts.filter(t => !covered(t.date));
+  out.tx.push(...stmtTx, ...extra);
+  const seenDue = new Map();
+  for (const d of dues) {
+    const near = [...seenDue.values()].find(o => norm(o.name) === norm(d.name) && Math.abs(days(o.date, d.date)) <= 10);
+    if (!near) seenDue.set(norm(d.name) + "|" + d.date, {...d}); else if (d.date > near.date) near.date = d.date;
+  }
+  out.due.push(...seenDue.values());
+  if (stmtTx.length || extra.length || dues.length) {
+    out.notes.push(`${src}: ${pages.length} páginas. ${stmtTx.length} movimientos sacados de los extractos${extra.length ? ` y ${extra.length} de recibos y Bizum posteriores al último extracto` : ""}. ${receipts.length - extra.length} justificantes ya aparecían en los extractos y no se cuentan dos veces.${cardPays ? ` ${cardPays} pagos de tarjeta se marcan como traspaso porque el detalle de compras ya está importado.` : ""}`);
+    return true;
+  }
+  return false;
+}
+function parseReceipt(lines, text, nt, yh, src){
+  const left = l => (l ? l.text.split(/\s{3,}/)[0].replace(/[\s,]+$/, "").trim() : "");
+  if (/seguros vamos|cuenta de seguros/.test(nt)) {
+    const amt = parseAmount((text.match(/TOTAL DE COBRO:?\s*([\d.,]+)/i) || [])[1]);
+    const date = parseDate((text.match(/FECHA COBRO:?\s*([\d-\/]+)/i) || [])[1], yh);
+    if (!date || !amt) return null;
+    const due = [];
+    for (const l of lines) {
+      const m = l.text.replace(/\s+/g, " ").match(/^(Seguro\s.+?)\s+\d{6,}\s+\(\s*(\d{1,2})\s*-\s*(\d{1,2})\)\s+([\d.,]+)$/i);
+      if (!m) continue;
+      const k = +m[2], n = +m[3], cuota = parseAmount(m[4]); let venc = date; for (let j = 0; j <= n - k; j++) venc = addPeriod(venc, "mensual");
+      const name = m[1].replace(/\s\S{1,2}$/, "").split(" ").slice(0, 3).join(" ");
+      const ex = due.find(d => d.name.startsWith(name) && d.date === venc);
+      if (ex) { ex.amount += cuota * n; ex.count++; ex.name = `${name} (${ex.count} pólizas)`; }
+      else due.push({name, company:"Ibercaja", date:venc, amount:Math.round(cuota*n*100)/100, period:"anual", notice:30, source:src, count:1});
+    }
+    return {tx:{date, concept:"Seguros Ibercaja (cuota mensual)", amount:-Math.abs(amt), category:"Seguros", source:src}, due};
+  }
+  const all = [...text.matchAll(/(\d{2}[-\/]\d{2}[-\/]\d{2,4})\s+(\d{1,3}(?:\.\d{3})*,\d{2})\s*EUR/g)];
+  let date, amount;
+  if (all.length) { const last = all[all.length - 1]; date = parseDate(last[1], yh); amount = parseAmount(last[2]); }
+  const tr = text.match(/IMPORTE TRANSF\.?\s*([\d.]+,\d{2})/i);
+  if (tr) { amount = parseAmount(tr[1]); date = date || parseDate((text.match(/\d{2}-\d{2}-\d{2,4}/) || [])[0], yh); }
+  if (!date || !amount) return null;
+  const i = lines.findIndex(l => /^\s*\d{2}-\d{2}-\d{2,4}\s/.test(l.text));
+  let concept, sign;
+  if (/bizum cargo/.test(nt)) { concept = "Bizum enviado"; sign = -1; }
+  else if (/bizum abono/.test(nt)) { concept = "Bizum recibido"; sign = 1; }
+  else if (/a d e u d o|\badeudo\b|\* recibo \*/.test(nt)) {
+    sign = -1;
+    let cred = left(lines[i + 1]); if (/refer\.|domicil|^\d/i.test(cred)) cred = "";
+    let cpt = (text.match(/CONCEPTO DEL ADEUDO:\s*([^\n]+)/i) || [])[1] || "";
+    cpt = cpt.split(/\s{3,}/)[0].replace(/usuario:.*$/i, "").replace(/recibo:\s*\d+,?/i, "").replace(/[\s,]+$/, "").trim();
+    concept = cred || cpt || "Recibo domiciliado";
+    if (cred && cpt && cpt.length < 40 && !norm(cpt).includes(norm(cred).slice(0, 8))) concept = `${cred} · ${cpt}`;
+  }
+  else if (/nomina|sueldo|transferencia|\babono\b/.test(nt)) {
+    sign = 1; const who = left(lines[i + 1]), what = left(lines[i + 2]);
+    concept = [what, who].filter(s => s && !/^(rte|cta|iban)/i.test(s)).join(" · ") || "Abono";
+  }
+  else return null;
+  concept = cleanConcept(concept);
+  return {tx:{date, concept, amount:sign * Math.abs(amount), category:categorize(concept, sign * Math.abs(amount)), source:src}};
 }
 const cap = s => s.replace(/\b\w/g, c => c.toUpperCase());
 
@@ -855,16 +971,21 @@ async function readPDF(file, out){
   if (!window.pdfjsLib) throw new Error("no se pudo cargar el lector de PDF");
   pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
   const doc = await pdfjsLib.getDocument({data: new Uint8Array(await file.arrayBuffer())}).promise;
-  const lines = [];
+  const pages = [];
   for (let p=1; p<=doc.numPages; p++){
+    const lines = []; pages.push(lines);
     const tc = await (await doc.getPage(p)).getTextContent();
     const rows = [];
     for (const it of tc.items){ if (!it.str || !it.str.trim()) continue; const y = it.transform[5], x = it.transform[4];
       let r = rows.find(r => Math.abs(r.y - y) < 3); if (!r) rows.push(r = {y, items:[]}); r.items.push({str:it.str, x, w:it.width||0}); }
     rows.sort((a,b) => b.y - a.y);
-    for (const r of rows){ r.items.sort((a,b)=>a.x-b.x); lines.push({text: r.items.map(i=>i.str).join(" "), items: r.items}); }
+    for (const r of rows){ r.items.sort((a,b)=>a.x-b.x);
+      let t = ""; r.items.forEach((it, j) => { if (j) { const prev = r.items[j-1]; t += (it.x - (prev.x + prev.w) > 8) ? "    " : " "; } t += it.str; });
+      lines.push({text: t, items: r.items}); }
   }
+  const lines = pages.flat();
   if (lines.length < 3) { out.notes.push(`${file.name}: el PDF parece una imagen escaneada, no tiene texto que leer.`); return; }
+  if (pages.length > 1 && readBundle(pages, file.name, out)) return;
   linesToRecords(lines, file.name, out);
 }
 async function readPPTX(file, out){
@@ -932,7 +1053,7 @@ function openReview(){
   const o = pending; const nNew = o.tx.filter(t=>!t.dup).length;
   $("#reviewSub").textContent = `${o.files.map(f=>f.name).join(", ")}`;
   let h = "";
-  if (o.notes.length) h += `<h3>Avisos</h3><div class="log">${o.notes.map(n=>`<div class="muted">${esc(n)}</div>`).join("")}</div>`;
+  if (o.notes.length) h += `<h3>Notas</h3><div class="log">${o.notes.map(n=>`<div class="muted">${esc(n)}</div>`).join("")}</div>`;
   if (o.tx.length){
     const inc = o.tx.filter(t=>t.amount>0).reduce((a,t)=>a+t.amount,0), out = o.tx.filter(t=>t.amount<0).reduce((a,t)=>a-t.amount,0);
     const range = o.tx.map(t=>t.date).sort();
