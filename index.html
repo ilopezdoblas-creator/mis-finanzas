@@ -63,6 +63,7 @@ button{cursor:pointer}
 .month button:hover{background:var(--surface)}
 .month span{min-width:128px;text-align:center;font-weight:600;text-transform:capitalize}
 .btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 14px;font-weight:500}
+a.btn{text-decoration:none;color:var(--fg);display:inline-block}
 .btn:hover{border-color:var(--accent)}
 .btn.primary{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
 .btn.danger{color:var(--out);border-color:var(--out)}
@@ -170,6 +171,20 @@ select.cat:hover{border-color:var(--line)}
 .empty{padding:22px;text-align:center;color:var(--muted)}
 textarea{width:100%;min-height:90px;font-family:var(--font-num);font-size:.78rem;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);color:var(--fg);padding:8px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.tab-badge{display:inline-block;min-width:18px;padding:0 6px;margin-left:4px;border-radius:999px;background:var(--out);color:var(--surface);font-size:.72rem;font-weight:600;line-height:18px;text-align:center}
+.alert{margin-top:16px;border:1px solid var(--out);background:var(--out-soft);border-radius:var(--r);padding:12px 14px;display:grid;gap:8px}
+.alert-head{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.alert-head strong{flex:1;min-width:200px;color:var(--fg)}
+.alert ul{margin:0;padding:0;list-style:none;display:grid;gap:4px}
+.alert li{display:flex;gap:8px;flex-wrap:wrap;align-items:baseline}
+.alert li span.n{flex:1;min-width:160px}
+table.bal td,table.bal th{white-space:nowrap}
+table.bal tbody tr{cursor:pointer}
+table.bal tbody tr:hover td{background:var(--surface-2)}
+table.bal tr.empty-m td{color:var(--muted)}
+table.bal tfoot td{font-weight:600;border-top:2px solid var(--line)}
+.mini{display:inline-block;width:80px;height:6px;background:var(--surface-2);border-radius:3px;vertical-align:middle;overflow:hidden}
+.mini i{display:block;height:100%;background:var(--out)}
 .sync-chip{border:1px solid var(--line);background:var(--surface-2);border-radius:999px;padding:5px 12px;font-size:.82rem;display:flex;align-items:center;gap:6px}
 .sync-chip i{width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block}
 .sync-chip.ok i{background:var(--in)} .sync-chip.warn i{background:var(--warn)} .sync-chip.err i{background:var(--out)}
@@ -193,13 +208,15 @@ textarea{width:100%;min-height:90px;font-family:var(--font-num);font-size:.78rem
   <div class="tabs-wrap"><nav class="wrap tabs" id="tabs">
     <a href="#resumen">Resumen</a>
     <a href="#movimientos">Movimientos</a>
-    <a href="#vencimientos">Vencimientos</a>
+    <a href="#balance">Balance anual</a>
+    <a href="#vencimientos">Vencimientos <span class="tab-badge" id="dueBadge" hidden></span></a>
     <a href="#importar">Importar</a>
     <a href="#ajustes">Copia y ajustes</a>
   </nav></div>
 </header>
 
 <div class="wrap">
+  <div class="alert" id="dueAlert" hidden></div>
   <div class="banner" id="sampleBanner" hidden>
     <p><strong>Estás viendo datos de ejemplo.</strong> Se borran solos en cuanto importes tu primer extracto o añadas un movimiento.</p>
     <button class="btn small" id="clearSample">Borrar ejemplos ya</button>
@@ -285,12 +302,31 @@ textarea{width:100%;min-height:90px;font-family:var(--font-num);font-size:.78rem
       </form>
     </div>
     <div class="panel">
-      <div class="panel-head"><h2>Todos los vencimientos</h2><span class="muted">Ordenados por fecha</span></div>
+      <div class="panel-head"><h2>Todos los vencimientos</h2><button class="btn small" id="btnIcs" title="Descarga un archivo de calendario con un recordatorio antes de cada vencimiento">Añadir avisos a mi calendario</button></div>
+      <p class="muted" id="icsNote" style="margin:-4px 0 12px" hidden></p>
       <div class="due-list" id="dueAll"></div>
     </div>
     <div class="panel" id="suggestPanel" hidden>
       <div class="panel-head"><h2>Detectados en tus extractos</h2><span class="muted">Cargos de seguros y recibos que se repiten</span></div>
       <div class="due-list" id="dueSuggest"></div>
+    </div>
+  </section>
+
+  <!-- BALANCE ANUAL -->
+  <section data-view="balance" hidden>
+    <div class="panel-head" style="margin:0">
+      <h2 id="balTitle" style="font-size:1.35rem">Balance</h2>
+      <div class="filters"><button class="btn small" id="yPrev">‹ Año anterior</button><button class="btn small" id="yNext">Año siguiente ›</button></div>
+    </div>
+    <div class="kpis" id="balKpis"></div>
+    <div class="panel">
+      <div class="panel-head"><h2>Mes a mes</h2><span class="muted">Toca un mes para ver sus movimientos</span></div>
+      <div class="table-wrap"><table class="bal" id="balTable"></table></div>
+      <p class="muted" id="balNote" style="margin:10px 0 0"></p>
+    </div>
+    <div class="grid-2">
+      <div class="panel"><div class="panel-head"><h2>Gastos del año por categoría</h2></div><div class="table-wrap"><table class="bal" id="balCats"></table></div></div>
+      <div class="panel"><div class="panel-head"><h2>Ingresos del año</h2></div><div class="table-wrap"><table class="bal" id="balInc"></table></div></div>
     </div>
   </section>
 
@@ -523,7 +559,7 @@ function seedSample(s){
 }
 
 /* ---------- vistas ---------- */
-const VIEWS = ["resumen","movimientos","vencimientos","importar","ajustes"];
+const VIEWS = ["resumen","movimientos","balance","vencimientos","importar","ajustes"];
 function currentView(){ const h = location.hash.slice(1); return VIEWS.includes(h) ? h : "resumen"; }
 function showView(){
   const v = currentView();
@@ -542,10 +578,89 @@ function monthTotals(k){
   for (const t of state.tx) if (ym(t.date) === k && !isNeutral(t)) { if (t.amount >= 0) inc += t.amount; else out += -t.amount; }
   return {inc, out, save: inc - out};
 }
+/* ---------- balance anual ---------- */
+let balYear = null;
+function renderBalance(){
+  const y = balYear || activeMonth().slice(0,4);
+  $("#balTitle").textContent = `Balance ${y}`;
+  const rows = []; let tin = 0, tout = 0, acc = 0, withData = 0;
+  const byCat = {}, byInc = {};
+  for (let m = 1; m <= 12; m++){
+    const k = `${y}-${pad(m)}`; const t = monthTotals(k); const has = state.tx.some(x => ym(x.date) === k);
+    if (has) withData++;
+    tin += t.inc; tout += t.out; acc += t.save;
+    rows.push({k, ...t, has, acc});
+  }
+  for (const t of state.tx) if (t.date.slice(0,4) === y && !isNeutral(t)) { if (t.amount < 0) byCat[t.category] = (byCat[t.category]||0) - t.amount; else byInc[t.category] = (byInc[t.category]||0) + t.amount; }
+  const save = tin - tout, rate = tin > 0 ? Math.round(save/tin*100) : 0;
+  $("#balKpis").innerHTML = `
+    <div class="kpi in"><span class="label">Ingresos ${y}</span><span class="v">${fmt(tin)}</span><span class="d">${withData ? fmt(tin/withData)+" de media al mes" : "sin datos"}</span></div>
+    <div class="kpi out"><span class="label">Gastos ${y}</span><span class="v">${fmt(tout)}</span><span class="d">${withData ? fmt(tout/withData)+" de media al mes" : "sin datos"}</span></div>
+    <div class="kpi"><span class="label">Ahorrado en ${y}</span><span class="v" style="color:${save>=0?"var(--accent)":"var(--out)"}">${fmt(save)}</span><span class="d">${rate}% de lo ingresado</span></div>
+    <div class="kpi"><span class="label">Meses con datos</span><span class="v">${withData} de 12</span><span class="d">${withData < 12 ? "importa los que faltan para completar el año" : "año completo"}</span></div>`;
+  $("#balTable").innerHTML = `<thead><tr><th>Mes</th><th class="amt">Ingresos</th><th class="amt">Gastos</th><th class="amt">Ahorro</th><th class="amt">% ahorro</th><th class="amt">Acumulado</th></tr></thead>
+    <tbody>${rows.map(r => r.has ? `<tr data-k="${r.k}"><td style="text-transform:capitalize">${MESES[+r.k.slice(5)-1]}</td><td class="amt num in">${fmt(r.inc)}</td><td class="amt num out">${fmt(-r.out)}</td><td class="amt num" style="color:${r.save>=0?"var(--accent)":"var(--out)"}">${fmt(r.save)}</td><td class="amt num">${r.inc>0?Math.round(r.save/r.inc*100)+"%":"—"}</td><td class="amt num">${fmt(r.acc)}</td></tr>`
+      : `<tr class="empty-m" data-k="${r.k}"><td style="text-transform:capitalize">${MESES[+r.k.slice(5)-1]}</td><td class="amt">—</td><td class="amt">—</td><td class="amt">—</td><td class="amt">—</td><td class="amt num">${fmt(r.acc)}</td></tr>`).join("")}</tbody>
+    <tfoot><tr><td>Total</td><td class="amt num in">${fmt(tin)}</td><td class="amt num out">${fmt(-tout)}</td><td class="amt num">${fmt(save)}</td><td class="amt num">${tin>0?rate+"%":"—"}</td><td></td></tr></tfoot>`;
+  const missing = rows.filter(r => !r.has && r.k <= today().slice(0,7)).map(r => MESES[+r.k.slice(5)-1]);
+  $("#balNote").textContent = (missing.length ? `Faltan datos de ${missing.join(", ")}. ` : "") + "Los traspasos entre tus cuentas y los pagos de tarjeta ya detallados no cuentan como gasto.";
+  const catTable = (obj, cls) => { const e = Object.entries(obj).sort((a,b)=>b[1]-a[1]); const tot = e.reduce((a,x)=>a+x[1],0) || 1;
+    return e.length ? `<thead><tr><th>Categoría</th><th class="amt">Total</th><th class="amt">%</th><th class="amt">Al mes</th><th></th></tr></thead><tbody>${e.map(([c,v]) => `<tr data-cat="${esc(c)}"><td>${esc(c)}</td><td class="amt num ${cls}">${fmt(v)}</td><td class="amt num">${Math.round(v/tot*100)}%</td><td class="amt num">${fmt(v/(withData||1))}</td><td><span class="mini"><i style="width:${v/e[0][1]*100}%${cls==="in"?";background:var(--in)":""}"></i></span></td></tr>`).join("")}</tbody>` : `<tbody><tr><td class="empty">Sin datos en ${y}.</td></tr></tbody>`; };
+  $("#balCats").innerHTML = catTable(byCat, "out");
+  $("#balInc").innerHTML = catTable(byInc, "in");
+}
+
+/* ---------- alertas de vencimientos ---------- */
+const isInsurance = d => /seguro|poliza|póliza/i.test(d.name) || RULES.find(r => r[0] === "Seguros")[1].test(norm(d.company + " " + d.name));
+function alertDismissed(){ try { return localStorage.getItem("misfinanzas.alertOff") === today(); } catch(e){ return false; } }
+function renderAlert(){
+  const soon = state.due.filter(d => daysUntil(d.date) <= (d.notice ?? 30)).sort((a,b) => a.date.localeCompare(b.date));
+  const badge = $("#dueBadge"); badge.hidden = !soon.length; badge.textContent = soon.length;
+  const box = $("#dueAlert");
+  if (!soon.length || alertDismissed()) { box.hidden = true; return; }
+  const ins = soon.filter(isInsurance).length;
+  box.hidden = false;
+  box.innerHTML = `<div class="alert-head"><strong>${ins ? `${ins} seguro${ins>1?"s":""} ${ins>1?"vencen":"vence"} pronto` : "Tienes vencimientos cerca"}${soon.length > ins ? ` y ${soon.length-ins} pago${soon.length-ins>1?"s":""} más` : ""}</strong>
+    <a class="btn small" href="#vencimientos">Ver vencimientos</a><button class="btn small" id="alertOff">Ocultar hasta mañana</button></div>
+    <ul>${soon.slice(0,5).map(d => { const [cls, txt] = dueStatus(d); return `<li><span class="pill ${cls}">${txt}</span><span class="n"><strong>${esc(d.name)}</strong>${d.company?` · ${esc(d.company)}`:""}</span><span class="num">${d.amount?fmt(d.amount):""}</span></li>`; }).join("")}</ul>`;
+  $("#alertOff").onclick = () => { try { localStorage.setItem("misfinanzas.alertOff", today()); } catch(e){} box.hidden = true; };
+}
+
+/* ---------- calendario (.ics) con recordatorios ---------- */
+function buildICS(){
+  const esc2 = s => String(s).replace(/[\\;,]/g, m => "\\" + m).replace(/\n/g, "\\n");
+  const d8 = s => s.replace(/-/g, "");
+  const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "");
+  const rr = {anual:"FREQ=YEARLY", semestral:"FREQ=MONTHLY;INTERVAL=6", trimestral:"FREQ=MONTHLY;INTERVAL=3", mensual:"FREQ=MONTHLY"};
+  const L = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Mis Finanzas//ES","CALSCALE:GREGORIAN","METHOD:PUBLISH","X-WR-CALNAME:Vencimientos"];
+  for (const d of state.due) {
+    const next = iso(new Date(new Date(d.date+"T12:00").getTime() + 864e5));
+    const title = `Vence: ${d.name}${d.company ? " (" + d.company + ")" : ""}${d.amount ? " · " + fmt(d.amount) : ""}`;
+    L.push("BEGIN:VEVENT", `UID:${d.id}@mis-finanzas`, `DTSTAMP:${stamp}`, `DTSTART;VALUE=DATE:${d8(d.date)}`, `DTEND;VALUE=DATE:${d8(next)}`, `SUMMARY:${esc2(title)}`,
+      `DESCRIPTION:${esc2("Recordatorio de Mis Finanzas. Revisa el precio y compara antes de renovar.")}`);
+    if (rr[d.period]) L.push(`RRULE:${rr[d.period]}`);
+    const alarms = [...new Set([d.notice ?? 30, 7, 1])].filter(n => n > 0 && (d.period !== "mensual" || n <= 7));
+    for (const n of alarms) L.push("BEGIN:VALARM", "ACTION:DISPLAY", `DESCRIPTION:${esc2(title)}`, `TRIGGER:-P${n>1?(n-1)+"D":""}T15H`, "END:VALARM");
+    L.push("END:VEVENT");
+  }
+  L.push("END:VCALENDAR");
+  return L.join("\r\n");
+}
+const inFrame = (() => { try { return window.self !== window.top; } catch(e){ return true; } })();
+function exportICS(){
+  if (!state.due.length) { toast("Añade primero algún vencimiento."); return; }
+  if (inFrame) { $("#icsNote").hidden = false; $("#icsNote").textContent = "Desde aquí no se pueden descargar archivos. Usa este botón en tu web propia (la versión de GitHub)."; return; }
+  const blob = new Blob([buildICS()], {type:"text/calendar"});
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "vencimientos.ics"; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  $("#icsNote").hidden = false;
+  $("#icsNote").textContent = "Abre el archivo descargado y acepta añadirlo a tu calendario. Tendrás un aviso antes de cada vencimiento. Si cambias fechas aquí, vuelve a descargarlo.";
+}
+
 function render(){
   $("#sampleBanner").hidden = !hasSample();
   $("#mLabel").textContent = ymLabel(activeMonth());
-  renderSummary(); renderTx(); renderDue(); renderImportLog(); renderSettings(); showView();
+  renderSummary(); renderTx(); renderBalance(); renderDue(); renderAlert(); renderImportLog(); renderSettings(); showView();
 }
 
 function renderSummary(){
@@ -1096,6 +1211,11 @@ function restore(text){
 /* ---------- eventos ---------- */
 let toastT; function toast(msg){ const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(()=>t.hidden=true, 3800); }
 window.addEventListener("hashchange", showView);
+$("#yPrev").onclick = () => { balYear = String(+(balYear || activeMonth().slice(0,4)) - 1); renderBalance(); };
+$("#yNext").onclick = () => { balYear = String(+(balYear || activeMonth().slice(0,4)) + 1); renderBalance(); };
+$("#balTable").addEventListener("click", e => { const tr = e.target.closest("tr[data-k]"); if (!tr) return; state.ui.month = tr.dataset.k; $("#fltRange").value = "month"; save(); location.hash = "movimientos"; render(); });
+$("#balCats").addEventListener("click", e => { const tr = e.target.closest("tr[data-cat]"); if (!tr) return; $("#fltCat").value = tr.dataset.cat; $("#fltRange").value = "year"; state.ui.month = (balYear || activeMonth().slice(0,4)) + activeMonth().slice(4); location.hash = "movimientos"; render(); });
+$("#btnIcs").onclick = exportICS;
 $("#mPrev").onclick = () => { state.ui.month = addMonths(activeMonth(),-1); save(); render(); };
 $("#mNext").onclick = () => { state.ui.month = addMonths(activeMonth(),1); save(); render(); };
 $("#btnImport").onclick = $("#btnImport2").onclick = () => $("#fileInput").click();
