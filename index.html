@@ -185,6 +185,7 @@ table.bal tr.empty-m td{color:var(--muted)}
 table.bal tfoot td{font-weight:600;border-top:2px solid var(--line)}
 .mini{display:inline-block;width:80px;height:6px;background:var(--surface-2);border-radius:3px;vertical-align:middle;overflow:hidden}
 .mini i{display:block;height:100%;background:var(--out)}
+.modal thead th{position:sticky;top:0;background:var(--surface);z-index:1}
 .sync-chip{border:1px solid var(--line);background:var(--surface-2);border-radius:999px;padding:5px 12px;font-size:.82rem;display:flex;align-items:center;gap:6px}
 .sync-chip i{width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block}
 .sync-chip.ok i{background:var(--in)} .sync-chip.warn i{background:var(--warn)} .sync-chip.err i{background:var(--out)}
@@ -394,7 +395,7 @@ table.bal tfoot td{font-weight:600;border-top:2px solid var(--line)}
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="reviewTitle">
     <header><h2 id="reviewTitle">Revisar importación</h2><span class="muted" id="reviewSub"></span></header>
     <div class="body" id="reviewBody"></div>
-    <footer><button class="btn" id="reviewCancel">Cancelar</button><button class="btn primary" id="reviewOk">Añadir</button></footer>
+    <footer><button class="btn" id="rvMarkAll">Marcar todos</button><button class="btn" id="rvMarkNone">Desmarcar todos</button><span style="flex:1"></span><button class="btn" id="reviewCancel">Cancelar</button><button class="btn primary" id="reviewOk">Añadir</button></footer>
   </div>
 </div>
 <div id="toast" hidden></div>
@@ -1158,8 +1159,8 @@ async function handleFiles(files){
   if (!out.files.length) return;
   out.tx.forEach(t => { t.concept = scrub(t.concept) || "(sin concepto)"; });
   out.due.forEach(d => { d.name = scrub(d.name) || "Vencimiento"; d.company = scrub(d.company); });
-  const have = new Set(state.tx.filter(t=>!t.sample).map(dupKey)); const seen = new Set();
-  out.tx.forEach(t => { const k = dupKey(t); t.dup = have.has(k) || seen.has(k); seen.add(k); t.keep = !t.dup; });
+  const have = new Map(); state.tx.filter(t=>!t.sample).forEach(t => { const k = dupKey(t); have.set(k, (have.get(k)||0) + 1); });
+  out.tx.forEach(t => { const k = dupKey(t); const n = have.get(k) || 0; t.dup = n > 0; if (n) have.set(k, n - 1); t.keep = !t.dup; });
   const haveDue = new Set(state.due.filter(d=>!d.sample).map(d => d.date+"|"+norm(d.name)));
   out.due.forEach(d => { d.dup = haveDue.has(d.date+"|"+norm(d.name)); d.keep = !d.dup; });
   pending = out; openReview();
@@ -1243,6 +1244,10 @@ window.addEventListener("dragleave", e => { if (!isFileDrag(e)) return; dragDept
 window.addEventListener("drop", e => { if (!isFileDrag(e)) return; e.preventDefault(); dragDepth = 0; $("#overlay").hidden = true; $("#dropZone").classList.remove("hover"); handleFiles(e.dataTransfer.files); });
 
 // revisión
+function markAll(on){ if (!pending) return; pending.tx.forEach(t => t.keep = on); pending.due.forEach(d => d.keep = on);
+  document.querySelectorAll("#reviewBody .rvk, #reviewBody .rvd, #rvAll").forEach(c => c.checked = on); updateReviewBtn(); }
+$("#rvMarkAll").onclick = () => markAll(true);
+$("#rvMarkNone").onclick = () => markAll(false);
 $("#reviewCancel").onclick = () => { pending = null; $("#review").hidden = true; };
 $("#reviewOk").onclick = commitReview;
 $("#importLog").addEventListener("click", e => { const b = e.target.closest(".undoimp"); if (!b) return; const f = b.dataset.f;
