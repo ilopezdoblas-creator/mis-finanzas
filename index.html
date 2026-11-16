@@ -186,6 +186,17 @@ table.bal tfoot td{font-weight:600;border-top:2px solid var(--line)}
 .mini{display:inline-block;width:80px;height:6px;background:var(--surface-2);border-radius:3px;vertical-align:middle;overflow:hidden}
 .mini i{display:block;height:100%;background:var(--out)}
 .modal thead th{position:sticky;top:0;background:var(--surface);z-index:1}
+.form .wide{grid-column:span 2}
+@media (max-width:560px){.form .wide{grid-column:auto}}
+.month-block{display:grid;gap:4px;padding-block:10px;border-bottom:1px solid var(--line)}
+.month-block:last-child{border-bottom:0}
+.month-block h3{display:flex;justify-content:space-between;gap:10px;text-transform:capitalize;flex-wrap:wrap}
+.plan-row{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:10px;align-items:baseline;font-size:.92rem}
+.plan-row .d{color:var(--muted);font-family:var(--font-num);font-size:.85rem}
+.tag{font-size:.7rem;font-weight:600;padding:1px 7px;border-radius:999px;background:var(--surface-2);color:var(--muted);margin-left:6px;white-space:nowrap}
+.tag.tdue{background:var(--warn-soft);color:var(--warn)}
+td input.inl{width:110px;border:1px solid var(--line);border-radius:6px;padding:4px 6px;background:var(--surface);font-family:var(--font-num)}
+.gain{color:var(--in)} .loss{color:var(--out)}
 .sync-chip{border:1px solid var(--line);background:var(--surface-2);border-radius:999px;padding:5px 12px;font-size:.82rem;display:flex;align-items:center;gap:6px}
 .sync-chip i{width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block}
 .sync-chip.ok i{background:var(--in)} .sync-chip.warn i{background:var(--warn)} .sync-chip.err i{background:var(--out)}
@@ -210,6 +221,8 @@ table.bal tfoot td{font-weight:600;border-top:2px solid var(--line)}
     <a href="#resumen">Resumen</a>
     <a href="#movimientos">Movimientos</a>
     <a href="#balance">Balance anual</a>
+    <a href="#prevision">Previsión</a>
+    <a href="#patrimonio">Patrimonio</a>
     <a href="#vencimientos">Vencimientos <span class="tab-badge" id="dueBadge" hidden></span></a>
     <a href="#importar">Importar</a>
     <a href="#ajustes">Copia y ajustes</a>
@@ -310,6 +323,64 @@ table.bal tfoot td{font-weight:600;border-top:2px solid var(--line)}
     <div class="panel" id="suggestPanel" hidden>
       <div class="panel-head"><h2>Detectados en tus extractos</h2><span class="muted">Cargos de seguros y recibos que se repiten</span></div>
       <div class="due-list" id="dueSuggest"></div>
+    </div>
+  </section>
+
+  <!-- PREVISIÓN -->
+  <section data-view="prevision" hidden>
+    <div class="kpis" id="planKpis"></div>
+    <div class="panel">
+      <div class="panel-head"><h2>Añadir gasto o ingreso futuro</h2><span class="muted">Vacaciones, un arreglo, la vuelta al cole, una paga extra…</span></div>
+      <form class="form" id="planForm">
+        <label class="wide">Concepto<input id="pName" required placeholder="Ej. Vacaciones de verano"></label>
+        <label>Tipo<select id="pSign"><option value="-1">Gasto</option><option value="1">Ingreso</option></select></label>
+        <label>Fecha prevista<input type="date" id="pDate" required></label>
+        <label>Importe (€)<input id="pAmount" required inputmode="decimal" placeholder="600"></label>
+        <label>Categoría<select id="pCat"></select></label>
+        <label>Se repite<select id="pPeriod"><option value="unico">No, una vez</option><option value="mensual">Cada mes</option><option value="trimestral">Cada 3 meses</option><option value="semestral">Cada 6 meses</option><option value="anual">Cada año</option></select></label>
+        <label>Hasta (opcional)<input type="date" id="pUntil"></label>
+        <div class="actions"><button class="btn primary" type="submit">Añadir</button></div>
+      </form>
+    </div>
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-head"><h2>Próximos 12 meses</h2><span class="muted">Tus previsiones y los vencimientos</span></div>
+        <div id="planMonths"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Tus previsiones</h2></div>
+        <div class="table-wrap"><table><tbody id="planList"></tbody></table></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PATRIMONIO -->
+  <section data-view="patrimonio" hidden>
+    <div class="kpis" id="wKpis"></div>
+    <div class="panel">
+      <div class="panel-head"><h2>Añadir cuenta o inversión</h2><span class="muted">PayPal, Revolut, Santander, fondos, plan de pensiones…</span></div>
+      <form class="form" id="wForm">
+        <label class="wide">Nombre<input id="wName" required placeholder="Ej. Revolut, Fondo indexado, Plan de pensiones Ibercaja"></label>
+        <label>Tipo<select id="wKind">
+          <optgroup label="Dinero disponible"><option>Cuenta bancaria</option><option>PayPal o monedero</option><option>Efectivo</option></optgroup>
+          <optgroup label="Inversión"><option>Fondo de inversión</option><option>Acciones o ETF</option><option>Plan de pensiones</option><option>Depósito</option><option>Criptomonedas</option><option>Otra inversión</option></optgroup>
+        </select></label>
+        <label><span id="wValLbl">Saldo actual (€)</span><input id="wValue" required inputmode="decimal" placeholder="1.250,00"></label>
+        <label id="wInvLbl" hidden>Dinero aportado (€)<input id="wInvested" inputmode="decimal" placeholder="1.000,00"></label>
+        <div class="actions"><button class="btn primary" type="submit">Añadir</button></div>
+      </form>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2>Cuentas y dinero disponible</h2><span class="muted">Actualiza el saldo cuando quieras</span></div>
+      <div class="table-wrap"><table id="wCash"></table></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2>Dinero invertido</h2><span class="muted">Ganancia = valor actual − dinero aportado</span></div>
+      <div class="table-wrap"><table id="wInv"></table></div>
+    </div>
+    <div class="panel" id="wHistPanel" hidden>
+      <div class="panel-head"><h2>Evolución del patrimonio</h2></div>
+      <div id="wChart"></div>
     </div>
   </section>
 
@@ -507,7 +578,7 @@ const KEY = "misfinanzas.v1";
 let snap = null;
 let state = load();
 queueMicrotask(() => { snap = snapshot(); });
-function blank(){ return {tx:[], due:[], rules:{}, goal:0, imports:[], ui:{month:null}, del:{}, settingsU:0}; }
+function blank(){ return {tx:[], due:[], plan:[], accts:[], rules:{}, goal:0, imports:[], ui:{month:null}, del:{}, settingsU:0}; }
 function load(){
   try { const raw = localStorage.getItem(KEY); if (raw) { const s = JSON.parse(raw); return Object.assign(blank(), s); } } catch(e){}
   const s = blank(); seedSample(s); return s;
@@ -516,11 +587,11 @@ let saveWarned = false;
 /* Cada registro lleva "u" (última modificación). Lo borrado queda en state.del para que el borrado viaje entre dispositivos. */
 const recJSON = r => { const {u, ...rest} = r; return JSON.stringify(rest); };
 const settingsJSON = s => JSON.stringify({rules:s.rules, goal:s.goal});
-function snapshot(){ const m = new Map(); for (const k of ["tx","due"]) for (const r of state[k]) m.set(r.id, recJSON(r)); m.set("__settings", settingsJSON(state)); return m; }
+function snapshot(){ const m = new Map(); for (const k of ["tx","due","plan","accts"]) for (const r of state[k]) m.set(r.id, recJSON(r)); m.set("__settings", settingsJSON(state)); return m; }
 function stamp(){
   const now = Date.now(); state.del ||= {};
   const cur = snapshot();
-  for (const k of ["tx","due"]) for (const r of state[k]) { if (!r.u || (snap && snap.get(r.id) !== cur.get(r.id))) { r.u = now; delete state.del[r.id]; } }
+  for (const k of ["tx","due","plan","accts"]) for (const r of state[k]) { if (!r.u || (snap && snap.get(r.id) !== cur.get(r.id))) { r.u = now; delete state.del[r.id]; } }
   if (snap) { for (const id of snap.keys()) if (id !== "__settings" && !cur.has(id)) state.del[id] = now;
     if (snap.get("__settings") !== cur.get("__settings")) state.settingsU = now; }
   const old = now - 400*864e5; for (const [id,t] of Object.entries(state.del)) if (t < old) delete state.del[id];
@@ -564,7 +635,7 @@ function seedSample(s){
 }
 
 /* ---------- vistas ---------- */
-const VIEWS = ["resumen","movimientos","balance","vencimientos","importar","ajustes"];
+const VIEWS = ["resumen","movimientos","balance","prevision","patrimonio","vencimientos","importar","ajustes"];
 function currentView(){ const h = location.hash.slice(1); return VIEWS.includes(h) ? h : "resumen"; }
 function showView(){
   const v = currentView();
@@ -583,6 +654,89 @@ function monthTotals(k){
   for (const t of state.tx) if (ym(t.date) === k && !isNeutral(t)) { if (t.amount >= 0) inc += t.amount; else out += -t.amount; }
   return {inc, out, save: inc - out};
 }
+/* ---------- previsión de gastos futuros ---------- */
+function occurrences(item, from, to){
+  const out = []; let d = item.date, guard = 0;
+  while (d <= to && guard++ < 400) {
+    if (item.until && d > item.until) break;
+    if (d >= from) out.push(d);
+    if (item.period === "unico" || !item.period) break;
+    d = addPeriod(d, item.period);
+  }
+  return out;
+}
+function upcoming(from, to){
+  const list = [];
+  for (const p of state.plan) for (const d of occurrences(p, from, to)) list.push({date:d, name:p.name, amount:p.amount, cat:p.category, kind:"plan", id:p.id});
+  for (const v of state.due) for (const d of occurrences({...v, period: v.period}, from, to)) list.push({date:d, name:v.name + (v.company ? " · " + v.company : ""), amount:-(v.amount || 0), cat:"Vencimiento", kind:"due", id:v.id});
+  return list.sort((a,b) => a.date.localeCompare(b.date));
+}
+const cashTotal = () => state.accts.filter(a => !INV_KINDS.includes(a.kind)).reduce((s,a) => s + (a.balance || 0), 0);
+function renderPlan(){
+  if (!$("#pCat").options.length) $("#pCat").innerHTML = catOptions("Otros gastos");
+  if (!$("#pDate").value) $("#pDate").value = today();
+  const t0 = today(), end = iso(new Date(new Date().getFullYear(), new Date().getMonth() + 12, 0));
+  const overdue = state.plan.filter(p => p.date < t0 && (!p.until || p.date <= p.until)).map(p => ({date:p.date, name:p.name, amount:p.amount, cat:p.category, kind:"plan", id:p.id, late:true}));
+  const list = [...overdue, ...upcoming(t0, end)];
+  const plus = n => iso(new Date(Date.now() + n * 864e5));
+  const sumOut = to => -list.filter(x => x.date <= to && x.amount < 0).reduce((a,x) => a + x.amount, 0);
+  const net90 = list.filter(x => x.date <= plus(90)).reduce((a,x) => a + x.amount, 0);
+  const cash = cashTotal();
+  $("#planKpis").innerHTML = `
+    <div class="kpi out"><span class="label">Próximos 30 días</span><span class="v">${fmt(sumOut(plus(30)))}</span><span class="d">en gastos previstos</span></div>
+    <div class="kpi out"><span class="label">Próximos 3 meses</span><span class="v">${fmt(sumOut(plus(90)))}</span><span class="d">en gastos previstos</span></div>
+    <div class="kpi out"><span class="label">Próximos 12 meses</span><span class="v">${fmt(sumOut(end))}</span><span class="d">${fmt(sumOut(end)/12)} al mes de media</span></div>
+    <div class="kpi"><span class="label">Te quedaría en 3 meses</span><span class="v" style="color:${cash+net90>=0?"var(--accent)":"var(--out)"}">${state.accts.length ? fmt(cash + net90) : "—"}</span><span class="d">${state.accts.length ? `de ${fmt(cash)} en cuentas, sin contar la nómina` : "añade tus saldos en Patrimonio"}</span></div>`;
+  const byM = {}; for (const x of list) (byM[x.late ? t0.slice(0,7) : ym(x.date)] ||= []).push(x);
+  const months = Object.keys(byM).sort();
+  $("#planMonths").innerHTML = months.length ? months.map(k => { const items = byM[k]; const out = -items.filter(x=>x.amount<0).reduce((a,x)=>a+x.amount,0), inc = items.filter(x=>x.amount>0).reduce((a,x)=>a+x.amount,0);
+    return `<div class="month-block"><h3><span>${ymLabel(k)}</span><span class="num out" style="color:var(--out)">${fmt(-out)}${inc?` <span style="color:var(--in)">+${fmt(inc)}</span>`:""}</span></h3>
+      ${items.map(x => `<div class="plan-row"><span class="d">${x.date.slice(8)}/${x.date.slice(5,7)}</span><span>${esc(x.name)}${x.kind==="due"?'<span class="tag tdue">vencimiento</span>':x.late?'<span class="pill late" style="margin-left:6px">pendiente</span>':""}</span><span class="num ${x.amount>=0?"in":"out"}" style="color:var(--${x.amount>=0?"in":"out"})">${fmt(x.amount)}</span></div>`).join("")}</div>`; }).join("")
+    : `<div class="empty">Añade arriba tus gastos futuros. También aparecerán aquí tus vencimientos.</div>`;
+  const pl = [...state.plan].sort((a,b) => a.date.localeCompare(b.date));
+  $("#planList").innerHTML = pl.length ? pl.map(p => `<tr data-id="${p.id}"><td class="num muted">${fmtD(p.date)}</td><td class="concept">${esc(p.name)}<div class="src">${esc(p.category)} · ${PERIOD[p.period] || "una vez"}${p.until ? " hasta " + fmtD(p.until) : ""}</div></td><td class="amt num ${p.amount>=0?"in":"out"}">${fmt(p.amount)}</td>
+    <td><div style="display:flex;gap:4px;justify-content:flex-end;flex-wrap:wrap"><button class="btn small ppaid" title="Lo apunta como movimiento real">${p.amount<0?"Pagado":"Cobrado"}</button> <button class="icon-btn pdel" aria-label="Borrar previsión">✕</button></div></td></tr>`).join("")
+    : `<tr><td class="empty">Todavía no has añadido ninguna previsión.</td></tr>`;
+}
+
+/* ---------- patrimonio: otras cuentas e inversiones ---------- */
+const INV_KINDS = ["Fondo de inversión","Acciones o ETF","Plan de pensiones","Depósito","Criptomonedas","Otra inversión"];
+const ago = d => { const n = -daysUntil(d); return n <= 0 ? "hoy" : n === 1 ? "ayer" : n < 60 ? `hace ${n} días` : `hace ${Math.round(n/30)} meses`; };
+let wEditing = null;
+function renderWealth(){
+  const cash = state.accts.filter(a => !INV_KINDS.includes(a.kind)), inv = state.accts.filter(a => INV_KINDS.includes(a.kind));
+  const tc = cash.reduce((s,a)=>s+(a.balance||0),0), tv = inv.reduce((s,a)=>s+(a.balance||0),0), ti = inv.reduce((s,a)=>s+(a.invested||0),0), g = tv - ti;
+  $("#wKpis").innerHTML = `
+    <div class="kpi"><span class="label">Patrimonio total</span><span class="v" style="color:var(--accent)">${fmt(tc + tv)}</span><span class="d">cuentas + inversiones</span></div>
+    <div class="kpi"><span class="label">Dinero en cuentas</span><span class="v">${fmt(tc)}</span><span class="d">${cash.length} cuenta${cash.length===1?"":"s"}</span></div>
+    <div class="kpi"><span class="label">Invertido hoy</span><span class="v">${fmt(tv)}</span><span class="d">aportado ${fmt(ti)}</span></div>
+    <div class="kpi ${g>=0?"in":"out"}"><span class="label">${g>=0?"Ganancia":"Pérdida"}</span><span class="v">${fmt(g)}</span><span class="d">${ti ? (g>=0?"+":"") + (g/ti*100).toLocaleString("es-ES",{maximumFractionDigits:1}) + "% sobre lo aportado" : "—"}</span></div>`;
+  const row = (a, isInv) => {
+    const editing = wEditing === a.id;
+    const gain = (a.balance||0) - (a.invested||0);
+    const val = editing ? `<input class="inl" id="eVal" inputmode="decimal" value="${String(a.balance ?? "").replace(".",",")}" aria-label="Nuevo valor">` : fmt(a.balance);
+    const invCell = isInv ? `<td class="amt num">${editing ? `<input class="inl" id="eInv" inputmode="decimal" value="${String(a.invested ?? "").replace(".",",")}" aria-label="Aportado">` : fmt(a.invested)}</td>` : "";
+    const gainCell = isInv ? `<td class="amt num ${gain>=0?"gain":"loss"}">${fmt(gain)}${a.invested?` <span class="src">${(gain>=0?"+":"")+(gain/a.invested*100).toLocaleString("es-ES",{maximumFractionDigits:1})}%</span>`:""}</td>` : "";
+    return `<tr data-id="${a.id}"><td class="concept"><strong>${esc(a.name)}</strong><div class="src">${esc(a.kind)}</div></td>${invCell}<td class="amt num">${val}</td>${gainCell}<td class="muted" style="white-space:nowrap">${ago(a.updated)}</td>
+      <td style="white-space:nowrap">${editing ? `<button class="btn small primary wsave">Guardar</button> <button class="btn small wcancel">Cancelar</button>` : `<button class="btn small wedit">Actualizar</button> <button class="icon-btn wdel" aria-label="Borrar">✕</button>`}</td></tr>`;
+  };
+  $("#wCash").innerHTML = cash.length ? `<thead><tr><th>Cuenta</th><th class="amt">Saldo</th><th>Actualizado</th><th></th></tr></thead><tbody>${cash.map(a => row(a,false)).join("")}</tbody>` : `<tbody><tr><td class="empty">Añade arriba tus cuentas de PayPal, Revolut, Santander, la de Ibercaja o el efectivo que tengas.</td></tr></tbody>`;
+  $("#wInv").innerHTML = inv.length ? `<thead><tr><th>Inversión</th><th class="amt">Aportado</th><th class="amt">Valor actual</th><th class="amt">Ganancia</th><th>Actualizado</th><th></th></tr></thead><tbody>${inv.map(a => row(a,true)).join("")}</tbody>` : `<tbody><tr><td class="empty">Añade tus fondos, acciones, plan de pensiones, depósitos o criptomonedas. En tu PDF de Ibercaja aparece un plan de pensiones de 1.488,61 € a 30 de septiembre.</td></tr></tbody>`;
+  // evolución por meses con el último valor conocido de cada cuenta
+  const points = state.accts.flatMap(a => (a.hist||[]).map(h => h.d.slice(0,7)));
+  const months = [...new Set(points)].sort();
+  $("#wHistPanel").hidden = months.length < 2;
+  if (months.length >= 2) {
+    const series = months.map(m => ({m, v: state.accts.reduce((s,a) => { const h = (a.hist||[]).filter(x => x.d.slice(0,7) <= m).pop(); return s + (h ? h.v : 0); }, 0)}));
+    const W=640, H=180, L=56, R=12, T=12, B=26; const max = Math.max(...series.map(s=>s.v)), min = Math.min(0, ...series.map(s=>s.v)); const step = niceStep((max-min)/3 || 1); const top = Math.ceil(max/step)*step || step;
+    const x = i => L + (series.length===1 ? 0 : i*(W-L-R)/(series.length-1)), y = v => T + (H-T-B) - (v-min)/(top-min)*(H-T-B);
+    let s = ""; for (let v=min; v<=top+1e-6; v+=step) s += `<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width=".6"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end">${compact(v)}</text>`;
+    s += `<polyline points="${series.map((p,i)=>`${x(i)},${y(p.v)}`).join(" ")}" fill="none" stroke="var(--accent)" stroke-width="2"/>`;
+    series.forEach((p,i) => { s += `<circle cx="${x(i)}" cy="${y(p.v)}" r="3.5" fill="var(--accent)"><title>${ymLabel(p.m)} · ${fmt(p.v)}</title></circle><text x="${x(i)}" y="${H-8}" text-anchor="middle">${MES3[+p.m.slice(5)-1]} ${p.m.slice(2,4)}</text>`; });
+    $("#wChart").innerHTML = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Evolución del patrimonio">${s}</svg>`;
+  }
+}
+
 /* ---------- balance anual ---------- */
 let balYear = null;
 function renderBalance(){
@@ -665,7 +819,7 @@ function exportICS(){
 function render(){
   $("#sampleBanner").hidden = !hasSample();
   $("#mLabel").textContent = ymLabel(activeMonth());
-  renderSummary(); renderTx(); renderBalance(); renderDue(); renderAlert(); renderImportLog(); renderSettings(); showView();
+  renderSummary(); renderTx(); renderBalance(); renderPlan(); renderWealth(); renderDue(); renderAlert(); renderImportLog(); renderSettings(); showView();
 }
 
 function renderSummary(){
@@ -1224,6 +1378,47 @@ function restore(text){
 /* ---------- eventos ---------- */
 let toastT; function toast(msg){ const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(()=>t.hidden=true, 3800); }
 window.addEventListener("hashchange", showView);
+// previsión
+$("#planForm").onsubmit = e => { e.preventDefault();
+  const amt = Math.abs(parseAmount($("#pAmount").value)); if (!amt) { toast("Escribe el importe."); return; }
+  const sign = +$("#pSign").value;
+  state.plan.push({id:uid(), name:$("#pName").value.trim(), date:$("#pDate").value, amount: sign * amt, category: $("#pCat").value, period:$("#pPeriod").value, until:$("#pUntil").value || ""});
+  $("#pName").value = ""; $("#pAmount").value = ""; $("#pUntil").value = ""; save(); render(); toast("Previsión añadida");
+};
+$("#pSign").onchange = () => { $("#pCat").value = $("#pSign").value === "1" ? "Otros ingresos" : "Otros gastos"; };
+$("#planList").addEventListener("click", e => {
+  const tr = e.target.closest("tr[data-id]"); if (!tr) return; const p = state.plan.find(x => x.id === tr.dataset.id); if (!p) return;
+  if (e.target.classList.contains("pdel")) { state.plan = state.plan.filter(x => x !== p); save(); render(); undoToast("Previsión borrada", () => { state.plan.push(p); save(); render(); }); }
+  else if (e.target.classList.contains("ppaid")) {
+    const tx = {id:uid(), date:p.date > today() ? today() : p.date, concept:p.name, amount:p.amount, category:p.category, source:"Previsión"};
+    if (hasSample()) dropSample();
+    state.tx.push(tx); const old = p.date;
+    if (p.period === "unico") state.plan = state.plan.filter(x => x !== p); else { p.date = addPeriod(p.date, p.period); if (p.until && p.date > p.until) state.plan = state.plan.filter(x => x !== p); }
+    save(); render(); undoToast("Apuntado en movimientos", () => { state.tx = state.tx.filter(x => x !== tx); p.date = old; if (!state.plan.includes(p)) state.plan.push(p); save(); render(); });
+  }
+});
+// patrimonio
+const kindIsInv = () => INV_KINDS.includes($("#wKind").value);
+$("#wKind").onchange = () => { const inv = kindIsInv(); $("#wInvLbl").hidden = !inv; $("#wValLbl").textContent = inv ? "Valor actual (€)" : "Saldo actual (€)"; };
+$("#wForm").onsubmit = e => { e.preventDefault();
+  const v = parseAmount($("#wValue").value); if (isNaN(v)) { toast("Escribe el saldo o el valor actual."); return; }
+  const inv = kindIsInv(); const invested = inv ? parseAmount($("#wInvested").value) : NaN;
+  state.accts.push({id:uid(), name:$("#wName").value.trim(), kind:$("#wKind").value, balance:v, invested: inv ? (isNaN(invested) ? v : invested) : undefined, updated:today(), hist:[{d:today(), v}]});
+  $("#wName").value = ""; $("#wValue").value = ""; $("#wInvested").value = ""; save(); render(); toast("Añadido");
+};
+document.addEventListener("click", e => {
+  const tr = e.target.closest("#wCash tr[data-id], #wInv tr[data-id]"); if (!tr) return; const a = state.accts.find(x => x.id === tr.dataset.id); if (!a) return;
+  if (e.target.classList.contains("wedit")) { wEditing = a.id; renderWealth(); $("#eVal").focus(); $("#eVal").select(); }
+  else if (e.target.classList.contains("wcancel")) { wEditing = null; renderWealth(); }
+  else if (e.target.classList.contains("wsave")) {
+    const v = parseAmount($("#eVal").value); if (isNaN(v)) { toast("Escribe un importe válido."); return; }
+    a.balance = v; if ($("#eInv")) { const i = parseAmount($("#eInv").value); if (!isNaN(i)) a.invested = i; }
+    a.updated = today(); a.hist = (a.hist || []).filter(h => h.d !== today()); a.hist.push({d:today(), v}); if (a.hist.length > 120) a.hist = a.hist.slice(-120);
+    wEditing = null; save(); render(); toast("Saldo actualizado");
+  }
+  else if (e.target.classList.contains("wdel")) { state.accts = state.accts.filter(x => x !== a); save(); render(); undoToast(`${a.name} borrado`, () => { state.accts.push(a); save(); render(); }); }
+});
+document.addEventListener("keydown", e => { if (e.key === "Enter" && (e.target.id === "eVal" || e.target.id === "eInv")) { e.preventDefault(); document.querySelector(".wsave")?.click(); } });
 $("#yPrev").onclick = () => { balYear = String(+(balYear || activeMonth().slice(0,4)) - 1); renderBalance(); };
 $("#yNext").onclick = () => { balYear = String(+(balYear || activeMonth().slice(0,4)) + 1); renderBalance(); };
 $("#balTable").addEventListener("click", e => { const tr = e.target.closest("tr[data-k]"); if (!tr) return; state.ui.month = tr.dataset.k; $("#fltRange").value = "month"; save(); location.hash = "movimientos"; render(); });
@@ -1393,14 +1588,14 @@ var Sync = (() => {
     const pick = kind => { const m = new Map();
       for (const r of [...(remote[kind] || []), ...(local[kind] || [])]) { if (r.sample) continue; const o = m.get(r.id); if (!o || (r.u || 0) > (o.u || 0)) m.set(r.id, r); }
       return [...m.values()].filter(r => !(del[r.id] >= (r.u || 0))); };
-    const out = Object.assign(blank(), local, {tx:pick("tx"), due:pick("due"), del});
+    const out = Object.assign(blank(), local, {tx:pick("tx"), due:pick("due"), plan:pick("plan"), accts:pick("accts"), del});
     if ((remote.settingsU || 0) > (local.settingsU || 0)) { out.rules = remote.rules || {}; out.goal = remote.goal || 0; out.settingsU = remote.settingsU; }
     const imp = new Map(); for (const i of [...(remote.imports || []), ...(local.imports || [])]) imp.set(i.when + "|" + i.file, i);
     out.imports = [...imp.values()].slice(-60);
     if (!out.tx.length && !out.due.length) { out.tx = local.tx.filter(r => r.sample); out.due = local.due.filter(r => r.sample); }
     return out;
   }
-  const payload = () => ({tx:state.tx.filter(r => !r.sample), due:state.due.filter(r => !r.sample), rules:state.rules, goal:state.goal, imports:state.imports, del:state.del || {}, settingsU:state.settingsU || 0});
+  const payload = () => ({tx:state.tx.filter(r => !r.sample), due:state.due.filter(r => !r.sample), plan:state.plan || [], accts:state.accts || [], rules:state.rules, goal:state.goal, imports:state.imports, del:state.del || {}, settingsU:state.settingsU || 0});
 
   function setStatus(text, cls){ status = {text, cls}; paint(); }
   async function run(){
