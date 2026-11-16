@@ -495,6 +495,10 @@ function categorize(concept, amount){
   return amount >= 0 ? "Otros ingresos" : "Otros gastos";
 }
 const ruleKey = concept => { const words = norm(concept).replace(/[0-9*#\/\-.,:]+/g," ").split(/\s+/).filter(w => w.length > 2 && !["compra","tarjeta","pago","recibo","tarj","con","de","del","las","los","adeudo","cargo","transaccion","contactless","movil","fecha","operacion"].includes(w)); return words.slice(0,2).join(" "); };
+const INCOME_CATS = ["Nómina e ingresos","Otros ingresos"];
+const ANY_SIGN = ["Bizum y transferencias","Traspasos entre cuentas","Efectivo","Ahorro e inversión"];
+/* Al elegir una categoría de gasto el importe pasa a negativo (resta); de ingreso, a positivo (suma) */
+function fitSign(t){ if (ANY_SIGN.includes(t.category)) return false; const want = INCOME_CATS.includes(t.category) ? 1 : -1; if (Math.sign(t.amount) !== want) { t.amount = -t.amount; return true; } return false; }
 const isNeutral = t => t.category === "Traspasos entre cuentas";
 
 /* ---------- estado ---------- */
@@ -784,7 +788,8 @@ function renderDue(){
 
 /* importaciones y ajustes */
 function renderImportLog(){
-  $("#importLog").innerHTML = state.imports.length ? state.imports.slice(-15).reverse().map(i => `<div><span class="num muted">${esc(i.when)}</span><strong>${esc(i.file)}</strong><span class="muted">${esc(i.result)}</span></div>`).join("") : `<div class="muted">Todavía no has importado nada.</div>`;
+  $("#importLog").innerHTML = state.imports.length ? state.imports.slice(-15).reverse().map(i => { const n = state.tx.filter(t => t.source && (t.source === i.file || t.source.startsWith(i.file + " · "))).length;
+    return `<div><span class="num muted">${esc(i.when)}</span><strong>${esc(i.file)}</strong><span class="muted">${esc(i.result)}</span>${n ? `<button class="btn small undoimp" data-f="${esc(i.file)}">Quitar sus ${n} movimientos</button>` : ""}</div>`; }).join("") : `<div class="muted">Todavía no has importado nada.</div>`;
 }
 function renderSettings(){
   if (document.activeElement !== $("#goal")) $("#goal").value = state.goal ? String(state.goal).replace(".",",") : "";
@@ -818,7 +823,7 @@ async function readText(file){
 
 const H = {
   date: /^(fecha|f\.?\s?(operacion|oper|valor|contable|movimiento)|fecha (de )?(operacion|valor|contable|movimiento|transaccion)|date|dia|booking date|transaction date)/,
-  concept: /concepto|descripcion|detalle|movimiento|description|comercio|beneficiario|ordenante|observaciones|referencia|texto|asunto|establecimiento/,
+  concept: /concepto|descripcion|detalle|movimiento|description|comercio|beneficiario|ordenante|observaciones|referencia|texto|asunto|establecimiento|emisor|acreedor|nombre|titular|empresa|entidad/,
   amount: /^(importe|cantidad|amount|monto|valor|importe eur|importe \(eur\)|importe €|euros|total)/,
   debit: /cargo|debe|gasto|salida|retirada|debito|debit/,
   credit: /abono|haber|ingreso|entrada|credito|credit/,
@@ -858,6 +863,13 @@ function rowsToRecords(rows, src, out){
     c.debit = c.amount < 0 ? findCol(hdr, H.debit, [c.balance]) : -1;
     c.credit = c.amount < 0 ? findCol(hdr, H.credit, [c.balance]) : -1;
     c.concepts = hdr.map((h,i)=> H.concept.test(h) && ![c.date,c.amount,c.debit,c.credit,c.balance].includes(i) ? i : -1).filter(i=>i>=0);
+    { const body = rows.slice(start, start + 80); const used = [c.date, c.amount, c.debit, c.credit, c.balance];
+      const numeric = i => { const v = body.map(r => String(r[i] ?? "").trim()).filter(Boolean); return v.length && v.filter(x => /^[\d\s\-\/.,*#]+$/.test(x)).length / v.length > 0.7; };
+      const textCols = c.concepts.filter(i => !numeric(i));
+      if (textCols.length) c.concepts = textCols;
+      else { const ncol = Math.max(...body.map(r => r.length)); let best = -1, bl = 0;
+        for (let i = 0; i < ncol; i++) { if (used.includes(i) || numeric(i) || i === findCol(hdr, H.date)) continue; const l = body.reduce((a, r) => a + (parseDate(r[i]) || !isNaN(parseAmount(r[i])) ? 0 : String(r[i] ?? "").length), 0); if (l > bl) { bl = l; best = i; } }
+        if (best >= 0) c.concepts = [best, ...c.concepts]; } }
     c.cat = findCol(hdr, H.cat); c.type = findCol(hdr, H.type, [...c.concepts]);
     if (c.amount < 0 && c.debit < 0 && c.credit < 0) { // columna de importe con otro nombre: primera numérica que no sea saldo
       c.amount = guessNumericCol(rows.slice(start), [c.date, c.balance]);
@@ -887,7 +899,7 @@ function rowsToRecords(rows, src, out){
   // hojas con importes siempre positivos y columna "tipo" (gasto/ingreso)
   if (recs.length && recs.every(x => x.amount > 0)) {
     if (recs.some(x => /gasto|cargo|pago|debe|salida|-/.test(x.typ))) recs.forEach(x => { if (/gasto|cargo|pago|debe|salida|-/.test(x.typ)) x.amount = -x.amount; });
-    else if (hi >= 0 && /gasto|cargo|pago/.test(norm(rows[hi][c.amount]))) recs.forEach(x => x.amount = -x.amount);
+    else if ((hi >= 0 && /gasto|cargo|pago|recibo|adeudo/.test(norm(rows[hi][c.amount] ?? ""))) || /recibo|gasto|pagos|cargo|adeudo/.test(norm(src))) recs.forEach(x => x.amount = -x.amount);
   }
   for (const x of recs) out.tx.push({date:x.date, concept:x.concept, amount:x.amount, category: x.cat || categorize(x.concept, x.amount), source: src});
   if (!recs.length) out.notes.push(`${src}: la tabla no tenía filas con fecha e importe.`);
@@ -1233,12 +1245,16 @@ window.addEventListener("drop", e => { if (!isFileDrag(e)) return; e.preventDefa
 // revisión
 $("#reviewCancel").onclick = () => { pending = null; $("#review").hidden = true; };
 $("#reviewOk").onclick = commitReview;
+$("#importLog").addEventListener("click", e => { const b = e.target.closest(".undoimp"); if (!b) return; const f = b.dataset.f;
+  const gone = state.tx.filter(t => t.source && (t.source === f || t.source.startsWith(f + " · ")));
+  state.tx = state.tx.filter(t => !gone.includes(t)); save(); render();
+  undoToast(`Quitados ${gone.length} movimientos de ${f}. Ya puedes volver a importarlo.`, () => { state.tx.push(...gone); save(); render(); }); });
 $("#reviewBody").addEventListener("change", e => {
   const tr = e.target.closest("tr");
   if (e.target.id === "rvAll") { pending.tx.forEach(t => t.keep = e.target.checked); document.querySelectorAll(".rvk").forEach(c => c.checked = e.target.checked); }
   else if (e.target.classList.contains("rvk")) pending.tx[tr.dataset.i].keep = e.target.checked;
   else if (e.target.classList.contains("rvd")) pending.due[tr.dataset.d].keep = e.target.checked;
-  else if (e.target.classList.contains("rvc")) pending.tx[tr.dataset.i].category = e.target.value;
+  else if (e.target.classList.contains("rvc")) { const t = pending.tx[tr.dataset.i]; t.category = e.target.value; if (fitSign(t)) { const td = tr.querySelector("td.amt"); td.textContent = fmt(t.amount); td.className = "amt num " + (t.amount >= 0 ? "in" : "out"); } }
   updateReviewBtn();
 });
 document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("#review").hidden) $("#reviewCancel").click(); });
@@ -1256,10 +1272,12 @@ $("#txForm").onsubmit = e => { e.preventDefault();
 $("#txBody").addEventListener("change", e => {
   if (!e.target.classList.contains("cat")) return;
   const t = state.tx.find(x => x.id === e.target.closest("tr").dataset.id); if (!t) return;
-  t.category = e.target.value; const k = ruleKey(t.concept);
+  t.category = e.target.value; const flipped = fitSign(t); const k = ruleKey(t.concept);
   let moved = 0;
-  if (k) { state.rules[k] = t.category; state.tx.forEach(x => { if (x !== t && ruleKey(x.concept) === k && x.category !== t.category) { x.category = t.category; moved++; } }); }
-  save(); render(); toast(k ? `Guardado. A partir de ahora «${k}» irá a ${t.category}${moved?` (y ${moved} movimientos más)`:""}.` : "Categoría guardada");
+  if (k) { state.rules[k] = t.category; state.tx.forEach(x => { if (x !== t && ruleKey(x.concept) === k && x.category !== t.category) { x.category = t.category; fitSign(x); moved++; } }); }
+  save(); render();
+  const signTxt = flipped ? (t.amount < 0 ? " Ahora resta como gasto." : " Ahora suma como ingreso.") : "";
+  toast(k ? `Guardado. A partir de ahora «${k}» irá a ${t.category}${moved?` (y ${moved} movimientos más)`:""}.${signTxt}` : `Categoría guardada.${signTxt}`);
 });
 $("#txBody").addEventListener("click", e => {
   if (!e.target.classList.contains("del")) return;
